@@ -1,2 +1,5 @@
 Flask
 gunicorn
+requests
+redis
+requests_oauthlib
