@@ -29,17 +29,36 @@ code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
 code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8")
 code_challenge = code_challenge.replace("=", "")
 
+def fetch_data_with_retry(url, params=None, max_retries=3, retry_delay=5):
+    retries = 0
+    while retries < max_retries:
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()  # Raise an exception for 4XX or 5XX status codes
+            if response.text.strip():  # Check if response is not empty
+                return response.json()  # Return JSON response
+            else:
+                print("Empty response received. Retrying...")
+                retries += 1
+                time.sleep(retry_delay)  # Wait before retrying
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data: {e}")
+            retries += 1
+            time.sleep(retry_delay)  # Wait before retrying
+    print(f"Max retries reached. Unable to fetch data from {url}.")
+    return None
+
 def make_token():
     return OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scopes)
 
 def parse_quote():
     url = "https://api.quotable.io/quotes/random"
     params = {'maxLength': 260}
-    response_raw = requests.request("GET", url, params=params).json()
-    response = []
-    response.append(response_raw[0]["content"])
-    response.append(response_raw[0]["author"])
+    response_raw = fetch_data_with_retry(url, params=params)
+    response = [response_raw[0]["content"], response_raw[0]["author"]]
     return response
+
+
 
 def post_tweet(payload, token):
     print("Tweeting!")
