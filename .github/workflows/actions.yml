@@ -2,7 +2,7 @@ name: run every_other_tweet.py
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '0 * * * *'
   
 jobs:
   build:
