@@ -18,7 +18,7 @@ refreshed_token = x.refresh_token(
   refresh_token=data["refresh_token"],
 )
 
-st_refreshed_token = '"()"'.format(refreshed_token)
+st_refreshed_token = '"{}"'.format(refreshed_token)
 j_refreshed_token = json.loads(st_refreshed_token)
 main.r.set("token", j_refreshed_token)
 
