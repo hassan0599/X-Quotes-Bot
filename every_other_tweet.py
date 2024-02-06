@@ -1,7 +1,6 @@
 import main
 import json
 import os
-import redis
 
 x = main.make_token()
 client_id = os.environ.get("CLIENT_ID")
