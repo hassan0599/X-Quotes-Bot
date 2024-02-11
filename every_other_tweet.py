@@ -26,4 +26,5 @@ main.r.set("token", j_refreshed_token)
 content = main.parse_quote()
 downloader.download(content[1], limit=5,  output_dir='dataset', adult_filter_off=True, force_replace=False, timeout=60, verbose=True)
 payload = {"text": "{}\n- {}".format(content[0], content[1])}
+main.post_image(content[1], refreshed_token)
 main.post_tweet(payload, refreshed_token)
