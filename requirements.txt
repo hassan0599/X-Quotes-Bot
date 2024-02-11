@@ -4,3 +4,4 @@ requests
 redis
 requests_oauthlib
 bing-image-downloader
+tweepy
