@@ -95,7 +95,7 @@ def post_image(author):
         access_token_secret
     )
     media = client.media_upload(filename=media_path)
-    return media.id_str
+    return media.media_id_string
 
 @app.route("/")
 def demo():
