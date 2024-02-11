@@ -1,7 +1,8 @@
 name: run every_other_tweet.py
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
   
 jobs:
   build:
