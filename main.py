@@ -82,7 +82,7 @@ def post_image(author, token):
             "Authorization": "Bearer {}".format(token["access_token"]),
         },
         files={
-            'media': open(f'dataset/{author}/Image_1.jpg', 'rb')
+            "media": open(f'dataset/{author}/Image_1.jpg', 'rb')
         },
         params={
             "media_category": "tweet_image",
