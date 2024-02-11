@@ -30,4 +30,4 @@ payload = {
   "text": "{}\n- {}".format(content[0], content[1]),
   "media": media
 }
-main.post_tweet(media, payload, refreshed_token)
+main.post_tweet(payload, refreshed_token)
