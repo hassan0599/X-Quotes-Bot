@@ -5,7 +5,7 @@ This project is an X bot built using Flask, Redis, and the X API. It allows user
 ## Features
 
 - Authorization with X OAuth2
-- Periodic posting of tweets with random quotes
+- Periodic posting of tweets with random quotes and images of the authors!
 - Refreshing OAuth2 tokens using Redis
 
 ## Files
