@@ -87,7 +87,7 @@ def post_tweet(payload, token):
         )
 
 def post_image(author):
-    media_path = "dataset/" + author + "/Image_1.jpg"
+    media_path = "/dataset/" + author + "/Image_1.jpg"
     client = get_tweepy(
         api_key, 
         api_secret,
