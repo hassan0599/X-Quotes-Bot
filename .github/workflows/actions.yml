@@ -27,5 +27,9 @@ jobs:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
           REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+          CONSUMER_API: ${{ secrets.CONSUMER_API }}
+          CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
         run: python every_other_tweet.py
           
