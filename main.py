@@ -85,7 +85,7 @@ def post_image(author, token):
             'media': open(f'dataset/{author}/Image_1.jpg', 'rb')
         },
         params={
-            "media_category": "TWEET_IMAGE",
+            "media_category": "tweet_image",
         }
     )
     print(response.status_code)
