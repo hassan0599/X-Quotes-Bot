@@ -77,7 +77,7 @@ def post_image(author, token):
     print("Uploading Image!")
     response = requests.request(
         "POST",
-        "https://upload.twitter.com/1.1/media/upload.json",
+        "https://upload.twitter.com/1.1/media/upload.json?",
         headers={
             "Authorization": "Bearer {}".format(token["access_token"]),
         },
