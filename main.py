@@ -89,7 +89,8 @@ def post_image(author, token):
             "media_category": "TWEET_IMAGE",
         }
     )
-    return response.json()
+    print(response)
+    return response
 
 @app.route("/")
 def demo():
