@@ -73,6 +73,23 @@ def post_tweet(payload, token):
             },
         )
 
+def post_image(author, token):
+    print("Uploading Image!")
+    return requests.request(
+        "POST",
+        "https://upload.twitter.com/1.1/media/upload.json",
+        headers={
+            "Authorization": "Bearer {}".format(token["access_token"]),
+            "Content-Type": "application/json",
+        },
+        files={
+            'media': open('Image_1.jpg', 'rb')
+        },
+        params={
+            "media_category": "TWEET_IMAGE",
+        }
+    )
+
 @app.route("/")
 def demo():
     global x
