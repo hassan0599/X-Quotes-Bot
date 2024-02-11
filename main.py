@@ -75,7 +75,7 @@ def post_tweet(payload, token):
 
 def post_image(author, token):
     print("Uploading Image!")
-    return requests.request(
+    response = requests.request(
         "POST",
         "https://upload.twitter.com/1.1/media/upload.json",
         headers={
@@ -89,6 +89,7 @@ def post_image(author, token):
             "media_category": "TWEET_IMAGE",
         }
     )
+    return response.json()
 
 @app.route("/")
 def demo():
