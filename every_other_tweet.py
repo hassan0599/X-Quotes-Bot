@@ -26,6 +26,9 @@ main.r.set("token", j_refreshed_token)
 content = main.parse_quote()
 downloader.download(content[1], limit=1,  output_dir='dataset', adult_filter_off=True, force_replace=False, timeout=60, verbose=True)
 media = main.post_image(content[1])
+media = {
+  "media_ids": [media]
+}
 payload = {
   "text": "{}\n- {}".format(content[0], content[1]),
   "media": media
