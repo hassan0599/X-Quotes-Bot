@@ -83,7 +83,7 @@ def post_image(author, token):
             "Content-Type": "application/json",
         },
         files={
-            'media': open(f'dataset/{author}/Image_1.jpg, 'rb')
+            'media': open(f'dataset/{author}/Image_1.jpg', 'rb')
         },
         params={
             "media_category": "TWEET_IMAGE",
