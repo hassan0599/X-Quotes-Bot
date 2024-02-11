@@ -80,7 +80,6 @@ def post_image(author, token):
         "https://upload.twitter.com/1.1/media/upload.json",
         headers={
             "Authorization": "Bearer {}".format(token["access_token"]),
-            "Content-Type": "application/json",
         },
         files={
             'media': open(f'dataset/{author}/Image_1.jpg', 'rb')
