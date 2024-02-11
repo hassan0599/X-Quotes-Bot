@@ -9,6 +9,7 @@ from requests.auth import AuthBase, HTTPBasicAuth
 from requests_oauthlib import OAuth2Session, TokenUpdated
 from flask import Flask, request, redirect, session, url_for, render_template
 import time
+import tweepy
 
 r = redis.from_url(os.environ.get("REDIS_URL"))
 
@@ -20,6 +21,10 @@ client_secret = os.environ.get("CLIENT_SECRET")
 auth_url = "https://twitter.com/i/oauth2/authorize"
 token_url = "https://api.twitter.com/2/oauth2/token"
 redirect_uri = os.environ.get("REDIRECT_URI")
+api_key = os.environ.get("CONSUMER_API")
+api_secret = os.environ.get("CONSUMER_SECRET")
+access_token = os.environ.get("ACCESS_TOKEN")
+access_token_secret = os.environ.get("ACCESS_SECRET")
 
 scopes = ["tweet.read", "users.read", "tweet.write", "offline.access"]
 
@@ -52,14 +57,22 @@ def fetch_data_with_retry(url, params=None, max_retries=3, retry_delay=5):
 def make_token():
     return OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scopes)
 
+def get_tweepy(api_key, api_secret, access_token, access_token_secret):
+    auth = tweepy.OAuth1UserHandler(
+        api_key, 
+        api_secret,
+        access_token,
+        access_token_secret
+    )
+    api = tweepy.API(auth)
+    return api
+
 def parse_quote():
     url = "https://api.quotable.io/quotes/random"
     params = {'maxLength': 260}
     response_raw = fetch_data_with_retry(url, params=params)
     response = [response_raw[0]["content"], response_raw[0]["author"]]
     return response
-
-
 
 def post_tweet(payload, token):
     print("Tweeting!")
@@ -73,23 +86,16 @@ def post_tweet(payload, token):
             },
         )
 
-def post_image(author, token):
-    print("Uploading Image!")
-    response = requests.request(
-        "POST",
-        "https://upload.twitter.com/1.1/media/upload.json?",
-        headers={
-            "Authorization": "Bearer {}".format(token["access_token"]),
-        },
-        files={
-            "media": open(f'dataset/{author}/Image_1.jpg', 'rb')
-        },
-        params={
-            "media_category": "tweet_image",
-        }
+def post_image(author):
+    media_path = "dataset/" + author + "/Image_1.jpg"
+    client = get_tweepy(
+        api_key, 
+        api_secret,
+        access_token,
+        access_token_secret
     )
-    print(response.status_code)
-    return response.json()
+    media = client.media_upload(filename=media_path)
+    return media.json()
 
 @app.route("/")
 def demo():
@@ -117,6 +123,3 @@ def callback():
     payload = {"text": "{}\n- {}".format(quote[0], quote[1])}
     response = post_tweet(payload, token).json()
     return response
-
-#if __name__ == "__main__":
-#    app.run()
