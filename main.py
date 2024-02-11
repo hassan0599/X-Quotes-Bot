@@ -89,7 +89,7 @@ def post_image(author, token):
         }
     )
     print(response.status_code)
-    return response
+    return response.json()
 
 @app.route("/")
 def demo():
