@@ -24,7 +24,7 @@ j_refreshed_token = json.loads(st_refreshed_token)
 main.r.set("token", j_refreshed_token)
 
 content = main.parse_quote()
-picture_query = content + " Portrait"
+picture_query = content[1] + " Portrait"
 downloader.download(picture_query, limit=1,  output_dir='dataset', adult_filter_off=True, force_replace=False, timeout=60, verbose=True)
 media = main.post_image(picture_query)
 media = {
