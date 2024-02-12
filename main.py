@@ -5,6 +5,7 @@ import re
 import json
 import requests
 from requests.exceptions import RequestException
+from requests_oauthlib import OAuth2Session
 from flask import Flask, request, redirect, session
 import time
 import tweepy
