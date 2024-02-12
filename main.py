@@ -2,15 +2,17 @@ import base64
 import hashlib
 import os
 import re
-import redis
 import json
 import requests
-from requests.auth import AuthBase, HTTPBasicAuth
-from requests_oauthlib import OAuth2Session, TokenUpdated
-from flask import Flask, request, redirect, session, url_for, render_template
+from requests.exceptions import RequestException
+from flask import Flask, request, redirect, session
 import time
 import tweepy
 
+import logging
+logging.basicConfig(level=logging.INFO)  # Setup basic logging
+
+import redis
 r = redis.from_url(os.environ.get("REDIS_URL"))
 
 app = Flask(__name__)
@@ -39,19 +41,19 @@ def fetch_data_with_retry(url, params=None, max_retries=3, retry_delay=5):
     retries = 0
     while retries < max_retries:
         try:
-            response = requests.get(url, params=params, verify=False)
+            response = requests.get(url, params=params)
             response.raise_for_status()  # Raise an exception for 4XX or 5XX status codes
             if response.text.strip():  # Check if response is not empty
                 return response.json()  # Return JSON response
             else:
-                print("Empty response received. Retrying...")
+                logging.warning("Empty response received. Retrying...")
                 retries += 1
                 time.sleep(retry_delay)  # Wait before retrying
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching data: {e}")
+        except RequestException as e:
+            logging.error(f"Error fetching data: {e}")
             retries += 1
             time.sleep(retry_delay)  # Wait before retrying
-    print(f"Max retries reached. Unable to fetch data from {url}.")
+    logging.error(f"Max retries reached. Unable to fetch data from {url}.")
     return None
 
 def make_token():
@@ -71,20 +73,28 @@ def parse_quote():
     url = "https://api.quotable.io/quotes/random"
     params = {'maxLength': 260}
     response_raw = fetch_data_with_retry(url, params=params)
-    response = [response_raw[0]["content"], response_raw[0]["author"]]
-    return response
+    if response_raw:
+        response = [response_raw[0]["content"], response_raw[0]["author"]]
+        return response
+    else:
+        return None
 
 def post_tweet(payload, token):
-    print("Tweeting!")
-    return requests.request(
-        "POST",
-        "https://api.twitter.com/2/tweets",
-        json=payload,
-        headers={
-            "Authorization": "Bearer {}".format(token["access_token"]),
-            "Content-Type": "application/json",
+    logging.info("Tweeting!")
+    try:
+        response = requests.post(
+            "https://api.twitter.com/2/tweets",
+            json=payload,
+            headers={
+                "Authorization": "Bearer {}".format(token["access_token"]),
+                "Content-Type": "application/json",
             },
         )
+        response.raise_for_status()
+        return response.json()
+    except RequestException as e:
+        logging.error(f"Error posting tweet: {e}")
+        return None
 
 def post_image(author):
     media_path = "/home/runner/work/x-quotes-bot/x-quotes-bot/dataset/" + author + "/Image_1.jpg"
@@ -99,27 +109,33 @@ def post_image(author):
 
 @app.route("/")
 def demo():
-    global x
     x = make_token()
     authorization_url, state = x.authorization_url(
         auth_url, code_challenge=code_challenge, code_challenge_method="S256"
-        )
+    )
     session["oauth_state"] = state
     return redirect(authorization_url)
 
 @app.route("/oauth/callback", methods=["GET"])
 def callback():
     code = request.args.get("code")
-    token  = x.fetch_token(
+    token = make_token().fetch_token(
         token_url=token_url,
         client_secret=client_secret,
         code_verifier=code_verifier,
         code=code,
-        )
-    st_token = '"{}"'.format(token)
-    j_token = json.loads(st_token)
-    r.set("token", j_token)
-    quote = parse_quote()
-    payload = {"text": "{}\n- {}".format(quote[0], quote[1])}
-    response = post_tweet(payload, token).json()
-    return response
+    )
+    if token:
+        r.set("token", json.dumps(token))
+        quote = parse_quote()
+        if quote:
+            payload = {"text": "{}\n- {}".format(quote[0], quote[1])}
+            response = post_tweet(payload, token)
+            if response:
+                return response
+            else:
+                return "Error posting tweet", 500
+        else:
+            return "Error retrieving quote", 500
+    else:
+        return "Error retrieving token", 500
