@@ -97,16 +97,28 @@ def post_tweet(payload, token):
         logging.error(f"Error posting tweet: {e}")
         return None
 
-def post_image(author):
+def post_image(author, max_retries=3, retry_delay=5):
     media_path = "/home/runner/work/x-quotes-bot/x-quotes-bot/dataset/" + author + "/Image_1.jpg"
-    client = get_tweepy(
-        api_key, 
-        api_secret,
-        access_token,
-        access_token_secret
-    )
-    media = client.media_upload(filename=media_path)
-    return media.media_id_string
+    retries = 0
+    while retries < max_retries:
+        try:
+            with open(media_path, 'rb') as file:
+                client = get_tweepy(
+                    api_key, 
+                    api_secret,
+                    access_token,
+                    access_token_secret
+                )
+                media = client.media_upload(filename=media_path)
+                return media.media_id_string
+        except FileNotFoundError:
+            retries += 1
+            if retries < max_retries:
+                logging.warning(f"File '{media_path}' not found. Retrying...")
+                time.sleep(retry_delay)
+            else:
+                logging.error(f"File '{media_path}' not found after {max_retries} retries.")
+                return None
 
 @app.route("/")
 def demo():
