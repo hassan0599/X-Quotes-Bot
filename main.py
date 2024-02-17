@@ -9,6 +9,7 @@ from requests_oauthlib import OAuth2Session
 from flask import Flask, request, redirect, session
 import time
 import tweepy
+import certifi
 
 import logging
 logging.basicConfig(level=logging.INFO)  # Setup basic logging
@@ -42,7 +43,7 @@ def fetch_data_with_retry(url, params=None, max_retries=3, retry_delay=5):
     retries = 0
     while retries < max_retries:
         try:
-            response = requests.get(url, params=params, verify=False)
+            response = requests.get(url, params=params, verify=certifi.where())
             response.raise_for_status()  # Raise an exception for 4XX or 5XX status codes
             if response.text.strip():  # Check if response is not empty
                 return response.json()  # Return JSON response
