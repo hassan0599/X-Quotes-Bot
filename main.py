@@ -99,27 +99,37 @@ def post_tweet(payload, token):
         return None
 
 def post_image(author, max_retries=3, retry_delay=5):
-    media_path = "/home/runner/work/x-quotes-bot/x-quotes-bot/dataset/" + author + "/Image_1.jpg"
-    retries = 0
-    while retries < max_retries:
-        try:
-            with open(media_path, 'rb') as file:
-                client = get_tweepy(
-                    api_key, 
-                    api_secret,
-                    access_token,
-                    access_token_secret
-                )
-                media = client.media_upload(filename=media_path)
-                return media.media_id_string
-        except FileNotFoundError:
-            retries += 1
-            if retries < max_retries:
-                logging.warning(f"File '{media_path}' not found. Retrying...")
-                time.sleep(retry_delay)
-            else:
-                logging.error(f"File '{media_path}' not found after {max_retries} retries.")
-                return None
+    image_formats = ['.jpg', '.png']  # List of supported image formats
+    media_id = None
+    
+    for image_format in image_formats:
+        media_path = f"/home/runner/work/x-quotes-bot/x-quotes-bot/dataset/{author}/Image_1{image_format}"
+        retries = 0
+        
+        while retries < max_retries:
+            try:
+                with open(media_path, 'rb') as file:
+                    client = get_tweepy(
+                        api_key, 
+                        api_secret,
+                        access_token,
+                        access_token_secret
+                    )
+                    media = client.media_upload(filename=media_path)
+                    media_id = media.media_id_string
+                    break  # Exit loop if media upload is successful
+            except FileNotFoundError:
+                retries += 1
+                if retries < max_retries:
+                    logging.warning(f"File '{media_path}' not found. Retrying...")
+                    time.sleep(retry_delay)
+                else:
+                    logging.error(f"File '{media_path}' not found after {max_retries} retries.")
+                    break  # Exit loop if maximum retries reached
+        if media_id:
+            break  # Exit loop if media upload is successful
+            
+    return media_id
 
 @app.route("/")
 def demo():
