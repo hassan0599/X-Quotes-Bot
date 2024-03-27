@@ -17,6 +17,7 @@ logging.basicConfig(level=logging.INFO)  # Setup basic logging
 import redis
 r = redis.from_url(os.environ.get("REDIS_URL"))
 
+# Initialize app
 app = Flask(__name__)
 app.secret_key = os.urandom(50)
 
